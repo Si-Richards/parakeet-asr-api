@@ -1,0 +1,28 @@
+version: '3.9'
+
+services:
+  parakeet-asr:
+    build: .
+    container_name: parakeet-asr
+    restart: unless-stopped
+
+    ports:
+      - "8000:8000"
+
+    gpus: all
+
+    environment:
+      MODEL_ID: "nvidia/parakeet-tdt-0.6b-v2"
+      TOKENIZERS_PARALLELISM: "false"
+
+    volumes:
+      - ./cache/huggingface:/root/.cache/huggingface
+      - ./cache/torch:/root/.cache/torch
+      - ./cache/nemo:/root/.cache/nemo
+
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
